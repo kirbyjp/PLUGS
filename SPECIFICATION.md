@@ -217,10 +217,65 @@ Community-derived profiles (Tier 3) are indexed in an open, version-controlled G
 
 ---
 
-## 5. Security, Pairing, and Air-Gap Standards
-* **5.1 Zero-Trust Input Parsing:** Strict JSON/CBOR schema validation preventing buffer overflow attacks.
-* **5.2 Physical Proximity Pairing:** Chassis button confirmation requirements for administrative keys.
-* **5.3 BadUSB / DMA Insulation:** Wireless air-gap protections against electrical or host-level USB exploits.
+## Section 5: Security, Sandboxing, Local Authentication & Privacy Boundaries
+
+### 5.1 Local-First & Air-Gapped Security Architecture
+
+The PLUGS standard enforces a strict **Local-First Air-Gap Boundary**. All device discovery, telemetry stream acquisition, manifest parsing, and primitive interactions execute 100% locally over proximity transport channels (such as BLE, local Wi-Fi sockets, USB, or Serial) via the **PLUGS Software Bridge (PSB)**.
+
+1. **Zero-WAN Default:** A PLUGS Device, Hardware Bridge (PHB), or Software Bridge (PSB) SHALL NOT require internet access, cloud server communication, external identity providers, or WAN routing to function.
+2. **Elimination of Cloud Attack Surfaces:** By operating strictly over local transport channels without inbound WAN ports or persistent cloud socket connections, PLUGS devices significantly reduce or eliminate entire classes of cloud-mediated vulnerabilities, including central database leaks, remote botnet recruitment, and wide-area network exploits.
+
+---
+
+### 5.2 Declarative Execution Only & Viewer Sandboxing
+
+To protect Host platforms (such as mobile phones, PCs, or local automation hubs) from malicious or malformed device streams, PLUGS enforces strict declarative schema parsing at the **PLUGS Viewer** boundary.
+
+1. **Declarative Execution Only:** Streams acquired by the PSB and handed to the PLUGS Viewer consist strictly of structured data payloads (JSON, YAML, or CBOR) defining UI Primitives (`toggle`, `slider`, `digital_readout`, `percentage_gauge`, `status_indicator`).
+2. **Strict Code Execution Prohibition:** A PLUGS Viewer SHALL NOT execute remote arbitrary binary code, mobile app scripts, JavaScript widgets, native dynamic libraries, or executable binaries transmitted inside a device stream.
+3. **Sandbox Isolation:** The PLUGS Viewer operates inside an isolated process sandbox provided by the Host OS. The architecture is designed to prevent malformed or malicious device streams from obtaining direct access to the Host file system, local network resources, or elevated operating system privileges.
+
+---
+
+### 5.3 Physical Proximity & Human Intent Verification
+
+To eliminate unauthorized remote or drive-by state changes over wireless local transport (e.g., an unauthorized connection unlocking a door from outside a building), sensitive state mutations enforce physical human intent verification based on action class:
+
+1. **High-Risk / Security-Critical Actions (MUST):** Sensitive operations—including initial device pairing, security key generation, door unlocking, safety limit overrides, and factory resets—MUST require a physical chassis interaction on the target hardware, such as:
+   * A physical button press or dual-button pattern hold.
+   * A physical switch toggle or mechanical key turn.
+   * A short-range physical proximity threshold (e.g., NFC tap or physical RSSI thresholding).
+2. **Standard Operational Actions (MAY):** Routine telemetry reads and non-critical control adjustments (such as adjusting a thermostat setpoint or dimming a light) MAY be executed over an established secure local session without requiring physical chassis button confirmation.
+
+---
+
+### 5.4 Transport-Decoupled Authentication & Session Security
+
+PLUGS sits directly above the transport layer and leverages the native security mechanisms provided by the underlying Transport (such as BLE GATT security, Wi-Fi WPA2/WPA3, or USB OS security) and the Host operating system.
+
+1. **Transport-Native Security Consumption:** The PSB receives secure, encrypted streams directly from the Host OS transport stack. PLUGS does not define or duplicate low-level cryptographic handshakes or transport encryption protocols.
+2. **Zero Cloud Authentication:** A PLUGS Device or Stream SHALL NOT require cloud accounts, vendor OAuth tokens, subscription credentials, or external identity providers to authorize local control.
+3. **No Vendor Key Escrow:** Neither manufacturers nor registry operators possess master recovery keys, backdoors, or administrative overrides for paired devices. Cryptographic session tokens reside exclusively within the local Host OS credential store and the physical device flash.
+
+---
+
+### 5.5 Local Ownership Transfer & Credential Reset
+
+To support the natural lifecycle of hardware (including secondhand sales, estate sales, property transfers, and off-grid equipment reuse), hardware ownership is tied strictly to physical possession.
+
+1. **Local Credential Reset:** A PLUGS Device or System SHALL provide a documented, purely physical mechanism on the hardware chassis (such as a hardware reset button pattern or jumper) to wipe stored pairing credentials and restore factory defaults.
+2. **Vendor-Independent Transfer:** Ownership transfer and credential resets MUST execute 100% locally on the device chassis without requiring manufacturer authorization, cloud server access, or vendor software tools.
+
+---
+
+### 5.6 Privacy Boundaries & Telemetry Protection
+
+PLUGS is designed to maximize user telemetry privacy by decoupling hardware operation from vendor-controlled cloud infrastructure.
+
+1. **Zero Unsolicited Telemetry Exfiltration:** Telemetry data, usage patterns, sensor readings, and operational logs remain strictly confined to the local PSB and PLUGS Viewer runtime unless explicitly forwarded by a user-configured domestic integration.
+2. **Anonymized Discovery Signatures:** Device Signatures (`sig_[12-hex]`) generated during Profile Discovery derive solely from observed protocol layouts (such as GATT service tables or USB stream headers). They SHALL NOT contain personally identifiable information (PII), geographic location data, or network identities.
+3. **Owner-Controlled Forwarding:** Any bridging of local PLUGS telemetry into a remote dashboard, cloud aggregator, or third-party monitoring system is an explicit, owner-initiated choice configured on home soil.
 
 ---
 
