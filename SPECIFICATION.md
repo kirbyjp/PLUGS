@@ -15,8 +15,8 @@
   * `Control_Command_Char` (Write Without Response): Inbound control execution.
 * **2.2 Local Wi-Fi & Static HTTP Serving:**
   * Embedded single-file HTML5/JS payload serving via onboard flash SPIFFS/LittleFS.
-* **2.3 Physical Serial / USB CDC-ACM:**
-  * Baud rates, packet framing (`\n` line-delimited JSON), and handshake flags.
+### 2.3 Physical Serial / USB CDC-ACM Standards
+  *Devices communicating over direct USB CDC-ACM or UART serial lines may implement the lightweight, zero-BOM `?PLUGS\n` line protocol. When queried, the device streams its onboard static schema manifest directly to the host or bridge. For full message sequencing, baud rate conventions, and headless profile requirements, see **Appendix A: Manufacturer 'PLUGS-Friendly' Serial Protocol Specification**.
 
 ---
 
