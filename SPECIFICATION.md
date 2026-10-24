@@ -43,49 +43,65 @@ PLUGS applies this self-describing philosophy to physical hardware:
 
 ---
 
-## 4. Legacy Protocol Synthesis & Hardware Bridge Engine
+## 4. Discovery, Legacy Protocol Synthesis & Hardware Bridge Engine
+
+To achieve universal utility on day one, the PLUGS architecture seamlessly supports natively compliant hardware while providing a reliable bridge for legacy, orphaned, and white-labeled equipment.
+
+---
 
 ### 4.1 Bridge Hardware Architecture
+
 Legacy appliances lacking native wireless or open PLUGS firmware participate in the ecosystem via a **Device-Side Hardware Bridge** (e.g., \$2 ESP32-S2/S3 with native USB Host / UART / RS-485 interfaces). The bridge serves as physical pipe host, stream sampler, and profile persistence node.
 
 ```text
-+-----------------------+     USB / Serial      +--------------------------+     BLE / Wi-Fi     +------------------------+
-| Legacy Hardware Tool  |  ------------------>  | $2 ESP32 Hardware Bridge |  ---------------->  | Phone / PC Client App  |
-| (e.g., Geiger Counter)|  Raw CDC / ASCII Text | (Hosts USB Pipe & Flash) |   PLUGS GATT / Web  | (Snoop & AI Engine)    |
-+-----------------------+                       +--------------------------+                     +------------------------+
++-----------------------+ USB / Serial +--------------------------+ BLE / Wi-Fi +------------------------+
+| Legacy Hardware Tool  | ------------------> | $2 ESP32 Hardware Bridge | ----------------> | Phone / PC Client App  |
+| (e.g., Geiger Counter)| Raw CDC / ASCII Text| (Hosts USB Pipe & Flash) | PLUGS GATT / Web  | (Snoop & AI Engine)    |
++-----------------------+                      +--------------------------+                     +------------------------+
 ```
 
 ---
 
-### 4.2 Multi-Tier Hardware Fingerprinting
-When an unknown legacy device is attached to a bridge, the bridge computes a **Composite Fingerprint Signature** to identify the hardware without executing complex code:
+### 4.2 Deterministic Device Signatures & Multi-Tier Trust Pipeline
+
+When an unknown or legacy device connects, client software generates a **Deterministic Device Signature** (`sig_[12-hex]`) by hashing observed protocol behavior rather than brand strings. This allows PLUGS to instantly recognize badge-engineered and white-labeled hardware sold under dozens of different brand names worldwide.
+
+#### Signature Hash Generation
+* **Bluetooth Low Energy (BLE):**
+  \\(\text{Device Signature} = \text{SHA-256}(\text{Primary Service UUIDs} + \text{GATT Characteristic Layout} + \text{Manufacturer Data Header})[:12]\\)
+* **Serial / USB Streams:**
+  \\(\text{Device Signature} = \text{SHA-256}(\text{USB VID:PID} + \text{Baud Rate} + \text{First 64 Bytes of Raw Stream})[:12]\\)
+
+#### The 4-Tier Trust Pipeline
+
+To maintain transparent confidence levels, client software categorizes incoming streams across four distinct trust tiers:
 
 ```text
-Fingerprint Signature = SHA256(USB_VID:PID || Product_Descriptor_String || Header_Stream_Prefix)
+[ Incoming Device Stream ]
+           │
+           ├── Tier 1: Native PLUGS Manifest (100% Onboard Flash Schema) ────────► [ Gold Standard / Verified ]
+           │
+           ├── Tier 2: Vendor-Supported Legacy Profile (Verified Shim) ──────────► [ High Confidence ]
+           │
+           ├── Tier 3: Community-Derived Profile (Signature Hash Match) ─────────► [ Best-Effort / Community ]
+           │
+           └── Tier 4: Unknown Device Stream (Unindexed Payload) ─────────────────► [ Snoop & Map Mode ]
 ```
 
-#### Tier 0: Native Manufacturer Serial Handshake
-Before querying external registries or initiating differential snoop logging, the bridge or host sends a 5-byte `?PLUGS\n` query over the physical serial interface. If the attached hardware natively supports the PLUGS serial protocol (see **Appendix A**), the device immediately streams its pre-compiled schema manifest, completing device configuration in under 200 milliseconds and bypassing AI synthesis entirely.
-
-#### Tier 1: Global & Local Schema Registry Lookup
-Before triggering local synthesis, the client app or bridge checks for a pre-built profile match using the composite signature:
-
-1. **Local Bridge Cache:** Query onboard flash (`/profiles/fp_[hash].json`).
-2. **Client App Local DB:** Query client-side offline database.
-3. **Open GitHub Registry:** If internet access is available, query `https://raw.githubusercontent.com/plugs-standard/registry/main/schemas/`.
-
-If a match is found, the validated PLUGS JSON schema is downloaded and written directly to the bridge’s onboard flash memory for instant 1-click configuration.
-
-#### Tier 2: Interactive Differential Snooping (Snoop Wizard)
-If the signature is unindexed, the client app launches the interactive snoop engine (see **Section 4.3**). The bridge captures passive background stream buffers, performs byte-level differential analysis on user button presses to isolate control payloads, and ingests optional brand/model context.
-
-#### Tier 3: AI Schema Synthesis & Flash Writeback
-The client app feeds the raw stream buffers, differential byte map, and user context into a local LLM prompt matrix (see **Section 4.4**). The engine synthesizes a valid PLUGS 1.0 JSON schema, flashes it back to the bridge's onboard memory, and offers to submit the new profile to the open GitHub registry.
+1. **Tier 1 — Native PLUGS Devices (Gold Standard):**
+   * *Mechanism:* The device responds to the Tier 0 `?PLUGS\n` query or broadcasts its schema directly from internal flash memory (`plugs_version: "1.0"`). 100% self-describing and authority-verified.
+2. **Tier 2 — Vendor-Supported Legacy Profiles:**
+   * *Mechanism:* Maintained directly by original manufacturers in public registries to support non-PLUGS legacy hardware via shims.
+3. **Tier 3 — Community-Derived Profiles (Signature Hash Match):**
+   * *Mechanism:* Matched via Device Signature (`sig_[12-hex]`) against the open community registry (`plugs-standard/registry`). Rendered with a clear "Community Profile" trust badge.
+4. **Tier 4 — Unknown Device Stream (Unindexed Payload):**
+   * *Mechanism:* Unrecognized serial or GATT stream. Triggers the interactive **Snoop Wizard** (Section 4.3) and **AI Synthesis Engine** (Section 4.4).
 
 ---
 
 ### 4.3 Interactive Differential Snooping & User Prompting
-If the device is unindexed, the client app initiates an interactive 3-phase snoop wizard to map telemetry and controls:
+
+If the device is an unindexed Tier 4 stream, the client app initiates an interactive 3-phase snoop wizard to map telemetry and controls:
 
 #### Phase A: Passive Background Capture (Telemetry Isolation)
 * The device sits idle for 5–10 seconds.
@@ -96,11 +112,7 @@ If the device is unindexed, the client app initiates an interactive 3-phase snoo
 * The client app prompts the user: *"Press or toggle a physical control on the device (e.g., Mute or Power)."*
 * The user presses the button.
 * The bridge captures the burst payload and performs a byte-level diff against the passive baseline buffer:
-
-```text
-Delta_Payload = Burst_Buffer - Passive_Baseline
-```
-
+  \\(\text{Delta Payload} = \text{Burst Buffer} - \text{Passive Baseline}\\)
 * The user tags the action in the UI (e.g., label = `"Audio Clicker Mute"`). The isolated command bytes are mapped to a `toggle` or `button` primitive.
 
 #### Phase C: User Context Injection
@@ -109,6 +121,7 @@ To maximize schema precision, the user optionally inputs basic brand/model metad
 ---
 
 ### 4.4 AI Schema Synthesis & Onboard Persistence
+
 The client app feeds the raw payload buffer, differential byte map, and user context into a local LLM or parser prompt engine.
 
 #### Prompt Engineering Synthesis Matrix
@@ -117,7 +130,6 @@ SYSTEM: You are the PLUGS 1.0 Protocol Schema Synthesizer.
 CONTEXT: Device Model = "GMC-300 Geiger Counter"
 RAW STREAM BUFFER: "CPM: 32, uSv/h: 0.14, Bat: 88%\r\n"
 DIFFERENTIAL MAP: Input "Mute" triggers output payload 0x4D 0x55 0x54 0x45
-
 TASK: Synthesize a valid PLUGS 1.0 JSON schema mapping fields to UI primitives.
 ```
 
@@ -173,10 +185,19 @@ TASK: Synthesize a valid PLUGS 1.0 JSON schema mapping fields to UI primitives.
 }
 ```
 
-#### Profile Flashing & Community Feedback Loop
-1. **Flash Upload:** Client app sends `profile_gmc300.json` back to the hardware bridge over BLE.
-2. **Flash Persistence:** The bridge saves the JSON payload to onboard LittleFS flash mapped to `USB_VID:PID`.
-3. **Community Contribution:** The client viewer prompts the user: *"Would you like to submit this synthesized schema to the open GitHub registry to auto-enable this device for all PLUGS users?"*
+#### Profile Flashing & Local Persistence
+1. **Flash Upload:** Client app sends `profile_gmc300.json` back to the hardware bridge over BLE or serial.
+2. **Flash Persistence:** The bridge saves the JSON payload to onboard LittleFS flash mapped to the device signature.
+3. **Instant Re-Connection:** Subsequent connections automatically load the local schema in under 200ms.
+
+---
+
+### 4.5 The Open GitHub Registry & Community Flywheel (`plugs-standard/registry`)
+
+Community-derived profiles (Tier 3) are indexed in an open, version-controlled GitHub repository (`plugs-standard/registry`):
+
+* **Lookup Resolution Order:** `Local Bridge Flash` $\rightarrow$ `Client App Offline Database` $\rightarrow$ `GitHub Raw CDN Lookup` (`https://raw.githubusercontent.com/plugs-standard/registry/main/signatures/sig_a3f912bc8e01.json`).
+* **Crowdsourced Schema Enrichment:** When a tinkerer uncovers an unmapped telemetry field (e.g., discovering Cell 4 Balance Voltage on a generic battery monitor) and submits a GitHub Pull Request, every PLUGS user owning a device matching that signature hash automatically gains access to the updated metric.
 
 ---
 
