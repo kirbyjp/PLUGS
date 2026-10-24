@@ -13,12 +13,12 @@ Modern smart hardware is broken. Consumers buy thermostats, e-bikes, smart deadb
 * **Cloud Bricking:** When an IoT startup goes bankrupt or shuts down its servers, perfectly working hardware becomes instant e-waste.
 * **App Store Deprecation:** Legacy devices become useless when 32-bit mobile apps are removed from the iOS and Android app stores.
 * **Surveillance and Security Risks:** Mandatory cloud connections expose home networks to remote telemetry exfiltration, central data breaches, and unwanted third-party tracking.
-* **The phone should become useful because it understands devices, not because every manufacturer wrote a separate app.**
 
 ---
 
 ## The Solution: PLUGS
 
+* **PLUGS starts from a different assumption: the phone should become useful because it understands devices, not because every manufacturer wrote a separate app.**
 **PLUGS** (*Proximity Local User Gateway Standard*) is an open, transport-agnostic hardware self-description standard. It shifts smart electronics from cloud-dependent software services back into standalone, local-first appliances.
 
 Devices ship with information, not infrastructure. If the manufacturer vanishes tomorrow, a PLUGS-compliant device continues to work forever.
