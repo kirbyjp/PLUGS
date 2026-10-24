@@ -49,12 +49,16 @@ Devices ship with information, not infrastructure. If the manufacturer vanishes 
 
 ### Phone and PC Client Software Layer
 
-PLUGS eliminates proprietary vendor apps on client devices by establishing three open rendering modes:
+PLUGS eliminates proprietary vendor apps on client devices through three open rendering choices:
 
-* **Zero-Install WebBluetooth (Browser Native):** The user opens Chrome, Edge, or any WebBluetooth-compatible browser on a phone or PC. The browser connects to the PLUGS device over BLE, reads the self-describing JSON schema, and dynamically generates interactive buttons, sliders, and telemetry gauges on the fly.
-* **Embedded Flat HTML5/JS (Device-Served):** For local Wi-Fi or USB connections, the microcontroller serves a single-file HTML5 interface stored in its onboard flash memory. The phone or PC browser renders the control panel locally without needing an internet connection or external web server.
-* **Universal Aggregator Integration:** Platforms like Home Assistant, Apple Home, Google Home, or Amazon Alexa run a native PLUGS ingestion module. When a new PLUGS device comes into range, the aggregator reads the schema and creates control tiles automatically, eliminating the need to write or maintain custom Python drivers.
-* **Zero-Trust Input Sandboxing:** Client software parses structured data (JSON/HTML) rather than executing arbitrary remote binaries or system drivers, ensuring phone and PC operating systems remain protected.
+* **Zero-Install WebBluetooth (Browser Native):** The browser connects directly over BLE, reads the JSON schema, and renders controls on the fly.  
+  * *Best for:* Instant, zero-friction access on phones and PCs without installing anything or joining a Wi-Fi network.
+
+* **Embedded Flat HTML5/JS (Device-Served):** The microcontroller hosts a single-file HTML5 interface in flash memory and serves it over local Wi-Fi or USB.  
+  * *Best for:* Complete offline access and rich graphical dashboards without relying on browser BLE APIs.
+
+* **Universal Aggregator Integration:** Platforms like Home Assistant, Apple Home, or Google Home ingest the schema and create control tiles automatically.  
+  * *Best for:* Multi-device home automation, background scheduling, and unified dashboard control.
 
 ---
 
