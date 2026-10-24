@@ -16,7 +16,7 @@
 * **2.2 Local Wi-Fi & Static HTTP Serving:**
   * Embedded single-file HTML5/JS payload serving via onboard flash SPIFFS/LittleFS.
 ### 2.3 Physical Serial / USB CDC-ACM Standards
-  *Devices communicating over direct USB CDC-ACM or UART serial lines may implement the lightweight, zero-BOM `?PLUGS\n` line protocol. When queried, the device streams its onboard static schema manifest directly to the host or bridge. For full message sequencing, baud rate conventions, and headless profile requirements, see **Appendix A: Manufacturer 'PLUGS-Friendly' Serial Protocol Specification**.
+Devices communicating over direct USB CDC-ACM or UART serial lines may implement the lightweight, zero-BOM `?PLUGS\n` line protocol. When queried, the device streams its onboard static schema manifest directly to the host or bridge. For full message sequencing, baud rate conventions, and headless profile requirements, see **Appendix A: Manufacturer 'PLUGS-Friendly' Serial Protocol Specification**.
 
 ---
 
@@ -49,6 +49,9 @@ When an unknown legacy device is attached to a bridge, the bridge computes a **C
 Fingerprint Signature = SHA256(USB_VID:PID || Product_Descriptor_String || Header_Stream_Prefix)
 ```
 
+#### Tier 0: Native Manufacturer Serial Handshake
+Before querying external registries or initiating differential snoop logging, the bridge or host sends a 5-byte `?PLUGS\n` query over the physical serial interface. If the attached hardware natively supports the PLUGS serial protocol (see **Appendix A**), the device immediately streams its pre-compiled schema manifest, completing device configuration in under 200 milliseconds and bypassing AI synthesis entirely.
+
 #### Tier 1: Global & Local Schema Registry Lookup
 Before triggering local synthesis, the client app or bridge checks for a pre-built profile match using the composite signature:
 
@@ -57,6 +60,12 @@ Before triggering local synthesis, the client app or bridge checks for a pre-bui
 3. **Open GitHub Registry:** If internet access is available, query `https://raw.githubusercontent.com/plugs-standard/registry/main/schemas/`.
 
 If a match is found, the validated PLUGS JSON schema is downloaded and written directly to the bridge’s onboard flash memory for instant 1-click configuration.
+
+#### Tier 2: Interactive Differential Snooping (Snoop Wizard)
+If the signature is unindexed, the client app launches the interactive snoop engine (see **Section 4.3**). The bridge captures passive background stream buffers, performs byte-level differential analysis on user button presses to isolate control payloads, and ingests optional brand/model context.
+
+#### Tier 3: AI Schema Synthesis & Flash Writeback
+The client app feeds the raw stream buffers, differential byte map, and user context into a local LLM prompt matrix (see **Section 4.4**). The engine synthesizes a valid PLUGS 1.0 JSON schema, flashes it back to the bridge's onboard memory, and offers to submit the new profile to the open GitHub registry.
 
 ---
 
@@ -172,3 +181,90 @@ TASK: Synthesize a valid PLUGS 1.0 JSON schema mapping fields to UI primitives.
 ## 7. Compliance & Testing Guidelines
 * **7.1 Schema Validation Suite:** Automated JSON-Schema verification scripts.
 * **7.2 Hardware Bridge Interoperability Benchmarks.**
+
+## Appendix A: Manufacturer 'PLUGS-Friendly' Serial Protocol Specification
+
+### A.1 Overview & Physical Pipe Parameters
+The PLUGS-Friendly Serial Protocol enables low-cost microcontrollers lacking wireless radios (such as microcontrollers in digital multimeters, solar charge controllers, or Geiger counters) to declare their telemetry metrics and controls over a simple wired UART or USB CDC-ACM connection.
+
+* **Baud Rate:** 115200 bps (default) or autobaud.
+* **Data Format:** 8 Data Bits, No Parity, 1 Stop Bit (8N1).
+* **Line Framing:** Standard newline ASCII character (`\n` or `\r\n`).
+* **Electrical Interfaces:** USB CDC-ACM, 3.3V/5V TTL UART, or RS-485.
+
+---
+
+### A.2 The 5-Byte Discovery Handshake (`?PLUGS\n`)
+
+When an ESP32 hardware bridge or client PC connects to a serial device, it initiates discovery by sending a 5-byte ASCII query.
+
+```text
+Host Query:       ?PLUGS\n
+Device Response:  [Full JSON Schema Manifest]\n
+```
+
+#### Protocol Execution Steps:
+1. **Query Phase:** Host sends ASCII string `?PLUGS\n`.
+2. **Device Detection:** Microcontroller recognizes `?PLUGS\n` in its serial RX interrupt buffer.
+3. **Payload Stream:** Microcontroller streams its stored JSON schema manifest directly out of internal flash memory over the TX line.
+4. **Timeout & Fallback:** If no response is received within 200ms, the host assumes the device is a legacy or non-compliant tool and initiates Tier 1 (Database Lookup) or Tier 2 (Differential Snoop & AI Synthesis).
+
+---
+
+### A.3 Headless and Displayless Device Profile Flags
+
+For hardware engineered without physical LCD screens or rubber navigation buttons, the schema manifest includes the `"headless"` boolean flag in the device metadata block.
+
+#### Schema Manifest Example with Headless Flag:
+```json
+{
+  "plugs_version": "1.0",
+  "device": {
+    "name": "Compact Solar Inverter",
+    "type": "power_inverter",
+    "headless": true,
+    "physical_display": false,
+    "physical_buttons": false
+  },
+  "telemetry": [
+    {
+      "id": "pv_voltage",
+      "label": "Solar Array Input",
+      "type": "digital_readout",
+      "unit": "V",
+      "value": 48.2
+    },
+    {
+      "id": "ac_output_power",
+      "label": "AC Load Power",
+      "type": "digital_readout",
+      "unit": "W",
+      "value": 350
+    }
+  ],
+  "controls": [
+    {
+      "id": "inverter_output",
+      "label": "AC Output Power",
+      "type": "toggle",
+      "current": "ON"
+    }
+  ],
+  "documentation": {
+    "user_manual": "/docs/manual.pdf",
+    "wiring_diagram": "/docs/schematic.svg"
+  }
+}
+```
+
+#### Client Viewer Behavior for Headless Devices:
+When `"headless": true` is present:
+* The client viewer automatically prioritizes interactive touch controls on the user's phone or PC screen.
+* Full diagnostic alarms and plain-text error descriptions are rendered automatically, replacing cryptic LED blinking codes or 7-segment error numbers.
+
+---
+
+### A.4 Onboard Documentation Serving
+Devices with onboard flash storage (such as SPIFFS, LittleFS, or external SPI flash chips) declare local file paths in the `"documentation"` schema block. 
+
+Client viewers can request these files over serial or local wireless links, ensuring user manuals and wiring schematics remain accessible off-grid without internet connectivity.
