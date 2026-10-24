@@ -26,5 +26,6 @@ Devices ship with **information, not infrastructure**. If the manufacturer vanis
 2. **Self-Describing Schemas:** Devices broadcast their own UI layouts, control capabilities, metrics, and fault diagnostics using open JSON, YAML, or compressed CBOR payloads.
 3. **Zero App Store Dependencies:** Render controls instantly in any standard browser via **WebBluetooth** or flat HTML5/JS served directly from the device's onboard flash memory.
 4. **Physical Proximity Security:** Pairing and state changes require physical human intent (chassis button presses or physical toggles)—eliminating remote network attacks.
+5. **Earth First (Eliminating Software-Deprecated E-Waste):** Software death wipes out billions of dollars in functional consumer electronics every year, forcing millions of tons of perfectly working hardware into landfills when cloud servers shut down, APIs change, or manufacturers go out of business. PLUGS ensures hardware utility matches physical component lifespans, independent of corporate software budgets or vendor viability.
 
 ---
