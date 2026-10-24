@@ -50,6 +50,18 @@ PLUGS restores **The Hammer Rule** to digital electronics. If the physical coppe
 
 ---
 
+## Supply Chain and Manufacturing Advantages
+
+PLUGS lowers engineering, bill-of-materials (BOM), and regulatory barriers for small hardware businesses, independent makers, and overseas ODMs:
+
+* **BOM & Assembly Reduction via Headless Architecture:** Manufacturers eliminate cheap LCDs, 7-segment screens, and fragile rubber navigation buttons. This removes physical chassis cutouts, acrylic display windows, waterproofing gaskets, and pin-heavy button harnesses—slashing component costs, tooling expenses, and manual assembly labor while eliminating the primary physical hardware failure points (water/dust ingress, cracked screens, and worn-out buttons).
+* **Zero AWS and Cloud Server Liabilities:** Manufacturers burn an open PLUGS firmware module onto an inexpensive ESP32 chip ($1.50) and ship the product with zero ongoing cloud hosting or backend server overhead.
+* **No Mobile App Maintenance:** Eliminates the continuous software debt of designing, publishing, and maintaining custom iOS and Android apps across breaking OS updates.
+* **Streamlined Import Compliance:** Air-gapped local appliances enter import markets purely as standalone local equipment (similar to a digital multimeter or microwave), minimizing network security liabilities and cross-border data privacy overhead.
+* **Onboard Documentation & Zero Web Dependencies:** Manufacturers store vector PDF user manuals, wiring schematics, and offline troubleshooting guides directly on the device's cheap onboard flash memory (e.g., 8MB/16MB SPIFFS/LittleFS). This eliminates broken 404 links, website redesign casualties, and customer support overhead when product documentation vanishes from corporate web servers over time.
+
+---
+
 ## Target Ecosystems and Market Opportunities
 
 Modern cloud-dependent smart hardware fails hardest where internet access is non-existent, unstable, or where hardware operational lifespan must outlast corporate startups. PLUGS expands outward from immediate off-grid champions into massive global hardware markets.
@@ -187,18 +199,6 @@ In commercial real estate, industrial facilities, and fleet management, cloud de
 * **Immunity to SaaS Sunsetting & Price Hikes:** If a commercial vendor goes bankrupt, shuts down its cloud infrastructure, or imposes predatory subscription hikes, installed hardware continues operating locally without requiring a costly "rip-and-replace" project.
 * **Zero-Downtime Platform Migration:** Property managers and fleet operators can transition an entire deployment of PLUGS sensors to a new software dashboard, local server, or open-source hub instantly—without dispatching technicians to re-key or swap physical devices.
 * **Air-Gapped Operational Continuity:** Multi-tenant access systems, utility sub-metering, and critical machinery monitoring remain 100% operational during internet service provider outages, cloud server downtime, or WAN network failures.
-
----
-
-## Supply Chain and Manufacturing Advantages
-
-PLUGS lowers engineering, bill-of-materials (BOM), and regulatory barriers for small hardware businesses, independent makers, and overseas ODMs:
-
-* **BOM & Assembly Reduction via Headless Architecture:** Manufacturers eliminate cheap LCDs, 7-segment screens, and fragile rubber navigation buttons. This removes physical chassis cutouts, acrylic display windows, waterproofing gaskets, and pin-heavy button harnesses—slashing component costs, tooling expenses, and manual assembly labor while eliminating the primary physical hardware failure points (water/dust ingress, cracked screens, and worn-out buttons).
-* **Zero AWS and Cloud Server Liabilities:** Manufacturers burn an open PLUGS firmware module onto an inexpensive ESP32 chip ($1.50) and ship the product with zero ongoing cloud hosting or backend server overhead.
-* **No Mobile App Maintenance:** Eliminates the continuous software debt of designing, publishing, and maintaining custom iOS and Android apps across breaking OS updates.
-* **Streamlined Import Compliance:** Air-gapped local appliances enter import markets purely as standalone local equipment (similar to a digital multimeter or microwave), minimizing network security liabilities and cross-border data privacy overhead.
-* **Onboard Documentation & Zero Web Dependencies:** Manufacturers store vector PDF user manuals, wiring schematics, and offline troubleshooting guides directly on the device's cheap onboard flash memory (e.g., 8MB/16MB SPIFFS/LittleFS). This eliminates broken 404 links, website redesign casualties, and customer support overhead when product documentation vanishes from corporate web servers over time.
 
 ---
 
