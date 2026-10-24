@@ -49,13 +49,16 @@ Devices ship with information, not infrastructure. If the manufacturer vanishes 
 
 ### Phone and PC Client Software Layer
 
-PLUGS eliminates proprietary vendor apps on client devices through three open rendering choices:
+PLUGS eliminates proprietary vendor apps on client devices through open rendering choices:
 
 * **Zero-Install WebBluetooth (Browser Native):** The browser connects directly over BLE, reads the JSON schema, and renders controls on the fly.  
   * *Best for:* Instant, zero-friction access on phones and PCs without installing anything or joining a Wi-Fi network.
 
 * **Embedded Flat HTML5/JS (Device-Served):** The microcontroller hosts a single-file HTML5 interface in flash memory and serves it over local Wi-Fi or USB.  
   * *Best for:* Complete offline access and rich graphical dashboards without relying on browser BLE APIs.
+ 
+* **Host-Side Value-Add Extensions:** PLUGS natively supports host-side application layers, enabling manufacturers to build custom value-add features like contact-named passcodes, calendar scheduling, or analytics on phone and desktop software. This extension architecture gives companies full freedom for commercial software differentiation while ensuring the physical device remains 100% accessible through open, unconstrained local endpoints.
+  * *Best for:* Proprietary software features, advanced local management, and commercial product differentiation.
 
 * **Universal Aggregator Integration:** Platforms like Home Assistant, Apple Home, or Google Home ingest the schema and create control tiles automatically.  
   * *Best for:* Multi-device home automation, background scheduling, and unified dashboard control.
