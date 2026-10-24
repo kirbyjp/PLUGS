@@ -13,6 +13,7 @@ Modern smart hardware is broken. Consumers buy thermostats, e-bikes, smart deadb
 * **Cloud Bricking:** When an IoT startup goes bankrupt or shuts down its servers, perfectly working hardware becomes instant e-waste.
 * **App Store Deprecation:** Legacy devices become useless when 32-bit mobile apps are removed from the iOS and Android app stores.
 * **Surveillance and Security Risks:** Mandatory cloud connections expose home networks to remote telemetry exfiltration, central data breaches, and unwanted third-party tracking.
+* ** The phone should become useful because it understands devices, not because every manufacturer wrote a separate app.**
 
 ---
 
