@@ -26,6 +26,21 @@ Devices communicating over direct USB CDC-ACM or UART serial lines may implement
 * **3.3 Telemetry Primitives:** `percentage_gauge`, `digital_readout`, `status_indicator`, `waveform_stream`.
 * **3.4 Documentation & Asset Metadata:** Onboard PDF/SVG links (`/manual.pdf`, `/schematic.svg`).
 
+### 3.5 Class-Free Primitives vs. Rigid Device Taxonomies
+
+Legacy smart home standards force hardware into rigid, predefined category boxes (such as `thermostat`, `smart_lock`, or `light_bulb`). 
+
+PLUGS intentionally rejects rigid device taxonomies in favor of a **Primitive-First UI Architecture**.
+
+#### The HTML & HID Principle
+Just as USB HID provided generic input building blocks (buttons, axes, sliders) and HTML provided universal web elements (`<button>`, `<input type="range">`, `<span>`, `<progress>`), PLUGS provides domain-agnostic telemetry and control primitives.
+
+PLUGS applies this self-describing philosophy to physical hardware:
+
+* **Generic Primitives First:** Client viewers render interactive interfaces using core primitives (`toggle`, `slider`, `percentage_gauge`, `digital_readout`, `status_indicator`).
+* **Unbounded Engineering:** An engineer building a custom solar pool heater with four temperature sensors, a chemical injector, and a pump flow monitor can describe their hardware completely without breaking client viewers or waiting for a standards committee to invent a "pool heater" category.
+* **Optional Semantic Roles:** To assist smart home aggregators (such as Home Assistant) in automated entity mapping, schemas may include optional semantic hints (e.g., `unit: "%"`, `role: "battery_level"`). However, client viewers render controls based strictly on the primitive type.
+
 ---
 
 ## 4. Legacy Protocol Synthesis & Hardware Bridge Engine
