@@ -10,15 +10,16 @@ To ensure complete precision across system components, specification documents, 
 
 1. **PLUGS Device:** A device that carries an onboard, self-describing PLUGS Manifest within its data stream.
 2. **Legacy Device:** A non-PLUGS device whose raw stream lacks an onboard Manifest and requires a Profile for interpretation. This stream is exposed via bridges (hardware or software) and interpreted via Profiles on the PLUGS Viewer located on the Host. 
-3. **Hardware Bridge:**  A physical intermediary used to adapt or expose a wired transport (such as RS-485, UART, or USB) and present a raw stream to the PLUGS Viewer. Considered part of the Transport layer.
-4. **Software Bridge:** A software intermediary running on the Host platform that connects to a wireless Legacy or PLUGS Device and exposes its raw protocol stream to the PLUGS Viewer without requiring additional physical hardware. Considered part of the Transport.
+3. **PLUGS Hardware Bridge (PHB)** A physical adapter converting wired/RS-485 media, or any other participating hardware manufacturer (even a wired but compliant PLUGS 1.0 device) into a transport pipe for the PSB.
+4. **PLUGS Software Bridge (PSB)** A Host-side software component that acquires device streams and presents them to the PLUGS Viewer through a single ingress path. Considered part of the Transport.
 5. **Host:** The computing platform (such as Android, iOS, Windows, Linux, or Home Assistant) running the PLUGS Viewer engine.
 6. **PLUGS Viewer:** The application engine running on a Host that performs four core duties: discovery, stream interpretation from Bridges, dynamic UI rendering, and user interaction.
 7. **Manifest:** An authoritative, self-describing PLUGS document embedded directly in onboard flash memory on a PLUGS Device.  Transported by a Bridge.
 8. **Profile:** An external schema overlay applied to a Legacy Device, stored exclusively on the Host and created and or managed by the PLUGS Viewer.
-9. **Device Signature:** A deterministic 12-character hexadecimal hash (`sig_[12-hex]`) generated from observed protocol behavior (such as GATT layout or USB VID:PID stream headers) to provide a deterministic hint used during Profile Discovery.
-10. **Transport:** The physical or wireless communication channel (such as BLE, local Wi-Fi, USB, Serial, or RS-485) used to present and exchange streams, manifests, profiles, telemetry, and control payloads via the onboard software bridge or a connected hardware bridge.
-11. **Primitive:** A fundamental, domain-agnostic UI or data element (such as `toggle`, `slider`, `digital_readout`, `percentage_gauge`, or `status_indicator`) rendered dynamically by a PLUGS Viewer.
+9. **Profile Discovery** The process by which the Viewer identifies, retrieves, synthesizes, or selects a candidate Profile for a stream lacking an onboard Manifest.
+10. **Device Signature:** A deterministic 12-character hexadecimal hash (sig_[12-hex]) generated from observed protocol behavior and used as a Profile Discovery hint, helping the Viewer locate, synthesize, or select the most appropriate Profile for a Legacy Device.
+11. **Transport:** The physical or wireless communication channel (such as BLE, local Wi-Fi, USB, Serial, or RS-485) used to present and exchange streams, manifests, profiles, telemetry, and control payloads via the onboard software bridge or a connected hardware bridge.
+12. **Primitive:** A fundamental, domain-agnostic UI or data element (such as `toggle`, `slider`, `digital_readout`, `percentage_gauge`, or `status_indicator`) rendered dynamically by a PLUGS Viewer.
 
 ---
 
