@@ -28,6 +28,24 @@ Devices ship with information, not infrastructure. If the manufacturer vanishes 
 4. **Physical Proximity Security:** Pairing and state changes require physical human intent (chassis button presses or physical toggles), eliminating remote network attacks.
 5. **Earth First (Eliminating Software-Deprecated E-Waste):** Software death wipes out billions of dollars in functional consumer electronics every year, forcing millions of tons of working hardware into landfills when cloud servers shut down, APIs change, or manufacturers go out of business. PLUGS ensures hardware utility matches physical component lifespans, independent of corporate software budgets or vendor viability.
 
+## The Consumer Guarantees of Device Purchase and Ownership
+
+When a consumer or business purchases a physical tool, that transaction represents a permanent transfer of ownership, not a conditional lease. 
+
+### The Hammer Rule
+Consider a steel hammer manufactured in 1974. If the original toolmaker goes out of business or gets acquired, that hammer sitting at a garage sale today loses zero utility. It hits a nail with the exact same reliability as a hammer manufactured yesterday. 
+
+Modern smart hardware breaks this basic principle of physics and commerce. When a corporate cloud server is shut down, a $300 smart deadbolt, solar charge controller, or environmental sensor turns into electronic waste. 
+
+PLUGS restores **The Hammer Rule** to digital electronics. If the physical copper, silicon, and enclosure still function, the device retains 100% of its core utility for the first, second, or tenth owner:
+
+1. **Internet-Independent Core Functionality:** A PLUGS device shall perform all primary telemetry, monitoring, and control functions locally. Internet connectivity may provide supplemental features, data feeds, software updates, or remote access, but loss of internet access shall never prevent the device from performing its core purpose.
+2. **Manufacturer Survivability:** A PLUGS device shall remain 100% operational even if the original manufacturer ceases operations, shuts down servers, or goes bankrupt.
+3. **Local Self-Description:** A PLUGS device shall carry its own UI layout, metric descriptors, and control definitions on internal flash memory, broadcasting status directly to local client devices.
+4. **Owner Wireless Control:** The device owner retains absolute authority over radio broadcast states (BLE, Wi-Fi, pairing modes) without remote cloud overrides.
+5. **Frictionless Second-Owner Transfer:** Physical hardware reset procedures allow seamless ownership transfer at garage sales, estate sales, or secondary markets without vendor account unlocking or original owner authorization.
+6. **Zero Subscription Prerequisites:** Core hardware utility shall never be gated behind recurring fees, cloud software tiers, or vendor accounts.
+
 ---
 
 ## Architecture and Data Flow
