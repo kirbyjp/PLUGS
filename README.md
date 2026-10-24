@@ -1,6 +1,8 @@
 # PLUGS: Proximity Local User Gateway Standard
 
-> Your smart devices should be appliances, not surveillance relationships. A wireless standard as simple as plugging in a USB device, and far more secure.
+> Your smart devices should be appliances, not surveillance relationships.
+
+PLUGS is a software gateway in your pocket, allowing devices to explain themselves without proprietary apps, accounts, or cloud dependencies.
 
 ---
 
@@ -239,6 +241,8 @@ PLUGS bridges legacy and proprietary hardware through two distinct retrofit mech
 * **Phase 4: Home Assistant Integration Module** (Native component for open-source home automation)
 
 ---
+
+Stay Grounded with PLUGS. Get out of the Cloud.
 
 ## Contributing and License
 
