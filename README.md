@@ -49,7 +49,7 @@ Devices ship with information, not infrastructure. If the manufacturer vanishes 
 
 ### Phone and PC Client Software Layer
 
-PLUGS eliminates proprietary vendor apps on client devices through open rendering choices:
+When engineers and hardware OEMs read the specification, seeing clean, generic primitives (like toggle, slider, percentage_gauge, and status_indicator) proves that the standard is genuinely domain-agnostic. The exact same protocol engine runs on an e-bike, a smart deadbolt, or a commercial HVAC damper without needing special-casing or custom drivers. PLUGS eliminates proprietary vendor apps on client devices through open rendering choices:
 
 * **Zero-Install WebBluetooth (Browser Native):** The browser connects directly over BLE, reads the JSON schema, and renders controls on the fly.  
   * *Best for:* Instant, zero-friction access on phones and PCs without installing anything or joining a Wi-Fi network.
@@ -67,13 +67,13 @@ PLUGS eliminates proprietary vendor apps on client devices through open renderin
 
 ### Schema Architectural Preface: The Death of Rigid Device Classes
 
-Traditional IoT standards (such as Matter, Zigbee, and legacy Bluetooth profiles) force hardware into rigid, pre-defined "device classes" like Door Locks, Thermostats, or Moisture Meters. When a manufacturer creates hybrid hardware or introduces novel features, these rigid committee categories break, forcing vendors to write proprietary clusters or custom mobile apps.
+Traditional IoT standards (such as Matter, Zigbee, and legacy Bluetooth profiles) force hardware into rigid, pre-defined "device classes" like Door Locks, Thermostats, or Moisture Meters. When a manufacturer creates hybrid hardware or introduces novel features, these rigid committee categories break, forcing vendors to write proprietary clusters or custom mobile apps. 
 
 #### The 2010 Memory Bottleneck
 This rigid taxonomy was originally an engineering necessity. In 2010, Bluetooth Low Energy microcontrollers operated under extreme physical constraints, often limited to 8 kilobytes of RAM and 20-byte wireless packet caps. Because these tiny chips could not store or transmit human-readable text schemas, manufacturers hardcoded numeric byte arrays (e.g., `0x01` = locked) and were forced to place the translation logic (the UI "Rosetta Stone") on proprietary cloud servers or single-purpose phone apps.
 
 #### The Web-Like PLUGS Paradigm
-Today, inexpensive $1.50 microcontrollers (such as the ESP32) feature megabytes of flash storage, hundreds of kilobytes of RAM, and high-speed BLE pipelines. The memory bottleneck that forced cloud dependence no longer exists.
+Today, inexpensive $1.50 microcontrollers (such as the ESP32) feature megabytes of flash storage, hundreds of kilobytes of RAM, and high-speed BLE pipelines. The memory bottleneck that forced cloud dependence no longer exists. 
 
 PLUGS abandons rigid device taxonomies entirely, adopting the dynamic design model of the World Wide Web:
 * **Web Browser Analogy:** Just as a web browser does not need prior knowledge of whether a site is a bank or a blog to render its buttons and text, a PLUGS viewer does not need prior knowledge of a device type to render its control panel.
@@ -171,13 +171,13 @@ PLUGS bridges legacy and proprietary hardware through two distinct retrofit mech
 
 ```text
 .
-├── README.md              <-- Specification overview and manifesto
+├── README.md              <-- Specification Architecture Overview
 ├── SPECIFICATION.md       <-- Complete technical protocol specification
 ├── LICENSE                <-- MIT Open Source License
 ├── schemas/               <-- Reference JSON/YAML device definition schemas
-│   ├── deadbolt.json
-│   ├── generator_bms.json
-│   └── thermostat.json
+│   ├── sample_a.json
+│   ├── sample_b.json
+│   └── sample_c.json
 ├── viewers/               <-- WebBluetooth PWA reference implementation
 └── firmware/              <-- ESP32/Arduino C++ helper libraries
 ```
