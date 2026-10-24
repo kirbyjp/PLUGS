@@ -135,12 +135,13 @@ Physical USB ports expose host machines to electrical destruction, BadUSB keystr
 
 ---
 
-## Commercial Fleet and Multi-Tenant Resilience
+## Commercial and Industry Resilience
 
-In commercial environments (such as apartment buildings, fleets of diesel generators, or HVAC systems), cloud dependency creates severe financial and operational risks.
+In commercial real estate, industrial facilities, and fleet management, cloud dependencies create massive financial and operational risks. Commercial hardware—such as HVAC dampers, backup generators, sub-meters, and access gates—is engineered to last 15 to 30 years, whereas cloud startups and SaaS platforms rarely survive a decade.
 
-* **Single-Point-of-Failure Elimination:** If a SaaS vendor hosting 10,000 generator or sub-meter sensors goes bankrupt, those devices do not become landfill.
-* **Seamless Platform Re-Housing:** Property managers can transition 10,000 existing PLUGS sensors to a new management platform or open-source hub in minutes without replacing a single piece of installed hardware.
+* **Immunity to SaaS Sunsetting & Price Hikes:** If a commercial vendor goes bankrupt, shuts down its cloud infrastructure, or imposes predatory subscription hikes, installed hardware continues operating locally without requiring a costly "rip-and-replace" project.
+* **Zero-Downtime Platform Migration:** Property managers and fleet operators can transition an entire deployment of PLUGS sensors to a new software dashboard, local server, or open-source hub instantly—without dispatching technicians to re-key or swap physical devices.
+* **Air-Gapped Operational Continuity:** Multi-tenant access systems, utility sub-metering, and critical machinery monitoring remain 100% operational during internet service provider outages, cloud server downtime, or WAN network failures.
 
 ---
 
@@ -154,12 +155,15 @@ PLUGS lowers engineering and regulatory barriers for small hardware businesses, 
 
 ---
 
-## Legacy Retrofit Engine
+### Legacy Hardware Retrofits
 
-PLUGS supports legacy hardware through two retrofit mechanisms:
+PLUGS bridges legacy and proprietary hardware through two distinct retrofit mechanisms depending on where the compatibility gap exists:
 
-* **Software Shims:** Software utilities utilize BLE snoop logging and schema synthesis to reverse-engineer proprietary Bluetooth devices into open PLUGS JSON profiles.
-* **Hardware Shims:** Inexpensive (\$2) inline ESP32 dongles attach to legacy serial ports or diagnostic headers to expose standard PLUGS GATT characteristics.
+1. **Device-Side Hardware Bridges (For Wired / Dumb Machines):** Low-cost ($2 ESP32) inline hardware adapters attached directly to non-wireless or wired legacy equipment (via UART, RS-485, screw terminals, or USB). The bridge translates proprietary serial telemetry into open wireless PLUGS endpoints.
+
+2. **Host-Side Software Shims (For Proprietary Wireless Devices):** Pure software translation engines running locally on the user's phone, PC, or local hub. The client software uses the host's native wireless radio to snoop and translate proprietary BLE payloads into clean PLUGS schemas in real time with zero extra hardware.
+
+*Note: For host PCs or local servers lacking native Bluetooth hardware, a standard off-the-shelf USB Bluetooth dongle provides the necessary wireless link.*
 
 ---
 
