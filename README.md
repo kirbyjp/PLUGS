@@ -65,9 +65,22 @@ PLUGS eliminates proprietary vendor apps on client devices through open renderin
 
 ---
 
-## Device Schema Standard
+### Schema Architectural Preface: The Death of Rigid Device Classes
 
-A PLUGS-compliant device broadcasts a lightweight, human-readable schema over BLE GATT characteristics or serial text streams.
+Traditional IoT standards (such as Matter, Zigbee, and legacy Bluetooth profiles) force hardware into rigid, pre-defined "device classes" like Door Locks, Thermostats, or Moisture Meters. When a manufacturer creates hybrid hardware or introduces novel features, these rigid committee categories break, forcing vendors to write proprietary clusters or custom mobile apps.
+
+#### The 2010 Memory Bottleneck
+This rigid taxonomy was originally an engineering necessity. In 2010, Bluetooth Low Energy microcontrollers operated under extreme physical constraints, often limited to 8 kilobytes of RAM and 20-byte wireless packet caps. Because these tiny chips could not store or transmit human-readable text schemas, manufacturers hardcoded numeric byte arrays (e.g., `0x01` = locked) and were forced to place the translation logic (the UI "Rosetta Stone") on proprietary cloud servers or single-purpose phone apps.
+
+#### The Web-Like PLUGS Paradigm
+Today, inexpensive $1.50 microcontrollers (such as the ESP32) feature megabytes of flash storage, hundreds of kilobytes of RAM, and high-speed BLE pipelines. The memory bottleneck that forced cloud dependence no longer exists.
+
+PLUGS abandons rigid device taxonomies entirely, adopting the dynamic design model of the World Wide Web:
+* **Web Browser Analogy:** Just as a web browser does not need prior knowledge of whether a site is a bank or a blog to render its buttons and text, a PLUGS viewer does not need prior knowledge of a device type to render its control panel.
+* **Atomic UI Primitives:** Devices simply broadcast their available capabilities using open JSON, YAML, or CBOR arrays containing basic UI primitives (toggles, sliders, status badges, gauges, and text inputs).
+* **Instant Hybrid Compatibility:** Whether hardware is a single-purpose moisture sensor or a complex hybrid generator with integrated BMS and deadbolt controls, the device self-describes its physical feature set. Generic PLUGS viewers render the interface on the fly without requiring custom drivers, vendor apps, or schema negotiation.
+
+---
 
 ### Example: Smart Deadbolt Schema (`deadbolt.json`)
 
