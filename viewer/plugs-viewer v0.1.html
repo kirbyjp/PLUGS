@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PLUGS Viewer (reference draft)</title>
+<style>
+:root{color-scheme:light dark;--bg:#f4f6f8;--fg:#14171c;--card:#fff;--mut:#566170;--ac:#087a50;--bd:#d5dbe3;--warn:#b3261e}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1116;--fg:#e8ebf0;--card:#171b22;--mut:#9aa5b4;--ac:#3ddc97;--bd:#2a313c;--warn:#ff6b5e}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,sans-serif;padding:16px;max-width:760px;margin-inline:auto}
+h1{font-size:1.3rem;margin:0 0 4px}h2{font-size:.85rem;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin:20px 0 8px}
+.bar,.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,select,input{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px 14px;min-height:44px}
+button{cursor:pointer}button.p{background:var(--ac);color:var(--bg);border-color:var(--ac);font-weight:600}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.card.pend{opacity:.6}.lbl{color:var(--mut);font-size:.85rem}.big{font-size:1.9rem;font-weight:700}
+.warn{color:var(--warn)}#st{margin:10px 0;min-height:1.4em}progress,meter,input[type=range]{width:100%}
+details{margin-top:10px}details input{width:100%;margin:4px 0;font-size:.8rem}.stale .big{opacity:.55}
+</style></head><body>
+<h1 id="title">PLUGS Viewer</h1>
+<div class="lbl" id="age">Reference draft, spec v1.0. No device connected.</div>
+<div class="bar" style="margin-top:10px">
+<button class="p" id="bc">Pair / Connect</button><button id="bd">Try demo (no device)</button><button id="bu">Units: metric</button>
+<label class="lbl" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="all" style="min-height:auto"> Show all nearby devices (debug)</label></div>
+<div id="st" role="status"></div>
+<div id="app" hidden><h2>Readings</h2><div id="tel"></div><h2>Controls</h2><div id="ctl"></div></div>
+<details><summary>Development UUIDs (temporary, replace when PLUGS publishes official ones)</summary>
+<label class="lbl">Service<input id="u_svc"></label><label class="lbl">Manifest characteristic<input id="u_man"></label>
+<label class="lbl">Values characteristic<input id="u_val"></label><label class="lbl">Control characteristic<input id="u_ctl"></label></details>
+<script>
+const $=s=>document.querySelector(s);
+const UU={svc:'9af5c09a-fe9c-40b8-a3a9-3047fb7382eb',man:'dab9981a-45f3-4647-a847-260cffc6da75',val:'c3981a76-484c-4d53-85b3-f12f33463b07',ctl:'6baa6f07-4d8e-4f7e-9cd1-b693be64f475'};
+for(const k in UU)$('#u_'+k).value=UU[k];
+const S={man:null,vals:{},enc:1,ctl:null,poll:null,demo:null,metric:true,seen:0,up:{},stale:false};
+const h=(t,p={},...k)=>{const e=document.createElement(t);Object.assign(e,p);e.append(...k);return e};
+const status=(m,bad)=>{const e=$('#st');e.textContent=m;e.className=bad?'warn':''};
+/* CBOR (minimal) */
+function cdec(b){let p=0;const dv=new DataView(b.buffer,b.byteOffset,b.byteLength);
+function rd(){const ib=b[p++],mt=ib>>5,ai=ib&31;
+if(mt==7){if(ai==20)return false;if(ai==21)return true;if(ai<24)return null;
+if(ai==26){const v=dv.getFloat32(p);p+=4;return v}if(ai==27){const v=dv.getFloat64(p);p+=8;return v}
+if(ai==25){const x=dv.getUint16(p);p+=2;const e=(x>>10)&31,f=x&1023;return(x>>15?-1:1)*(e==0?f*5.960464477539063e-8:e==31?(f?NaN:Infinity):(1+f/1024)*2**(e-15))}return null}
+let n=ai;if(ai==24)n=b[p++];else if(ai==25){n=dv.getUint16(p);p+=2}else if(ai==26){n=dv.getUint32(p);p+=4}else if(ai==27){n=Number(dv.getBigUint64(p));p+=8}
+if(mt==0)return n;if(mt==1)return -1-n;
+if(mt==3){const s=new TextDecoder().decode(b.subarray(p,p+n));p+=n;return s}
+if(mt==2){p+=n;return null}
+if(mt==4){const a=[];for(let i=0;i<n;i++)a.push(rd());return a}
+if(mt==5){const o={};for(let i=0;i<n;i++){const k=rd();o[k]=rd()}return o}return null}
+return rd()}
+function cenc(o){const out=[],hd=(m,n)=>{if(n<24)out.push(m<<5|n);else if(n<256)out.push(m<<5|24,n);else out.push(m<<5|25,n>>8,n&255)};
+const w=v=>{if(typeof v=='string'){const u=new TextEncoder().encode(v);hd(3,u.length);out.push(...u)}
+else if(v===true)out.push(0xf5);else if(Number.isInteger(v))v>=0?hd(0,v):hd(1,-1-v);
+else{const d=new DataView(new ArrayBuffer(8));d.setFloat64(0,v);out.push(0xfb,...new Uint8Array(d.buffer))}};
+const ks=Object.keys(o);hd(5,ks.length);for(const k of ks){w(k);w(o[k])}return new Uint8Array(out)}
+const dec=u=>S.enc==2?cdec(u):JSON.parse(new TextDecoder().decode(u));
+const enc=o=>S.enc==2?cenc(o):new TextEncoder().encode(JSON.stringify(o));
+const bytes=dv=>new Uint8Array(dv.buffer.slice(dv.byteOffset,dv.byteOffset+dv.byteLength));
+/* Units: display conversion only for registry units; unknown units shown as given */
+function conv(v,u){if(typeof v!='number')return[v,u||''];
+if(!S.metric){if(u=='km/h')return[v*.621371,'mph'];if(u=='km')return[v*.621371,'mi'];if(u=='degC')return[v*9/5+32,'degF']}
+else{if(u=='mph')return[v*1.609344,'km/h'];if(u=='mi')return[v*1.609344,'km'];if(u=='degF')return[(v-32)*5/9,'degC']}
+return[v,u||'']}
+const fmt=(v,u)=>{const[x,y]=conv(v,u);return(typeof x=='number'?(Math.round(x*10)/10):x)+(y?' '+y:'')};
+/* Rendering: every device string goes in via textContent, never as markup */
+function render(){const m=S.man;$('#title').textContent=m.device?.name||'PLUGS device';
+$('#tel').replaceChildren();$('#ctl').replaceChildren();S.up={};
+for(const t of m.telemetry||[])$('#tel').append(tel(t));
+for(const c of m.controls||[])$('#ctl').append(ctl(c));
+$('#app').hidden=false;apply()}
+function tel(t){const v=h('div',{className:'big'}),bar=t.type=='percentage'?h('progress',{max:100}):t.type=='percentage_gauge'?h('meter',{min:t.min,max:t.max}):null;
+const svg=t.type=='waveform_stream'?document.createElementNS('http://www.w3.org/2000/svg','svg'):null;
+if(svg){svg.setAttribute('viewBox','0 0 100 30');svg.setAttribute('width','100%');svg.setAttribute('height','50');}
+const card=h('div',{className:'card'},h('div',{className:'lbl'},t.label||t.id),v,...(bar?[bar]:[]),...(svg?[svg]:[]));
+S.up[t.id]=x=>{v.className='big'+(t.role=='fault'&&x&&x!='NONE'?' warn':'');
+if(x==null){v.textContent='unavailable';if(bar)bar.removeAttribute('value');return}
+if(svg){const a=x,lo=Math.min(...a),hi=Math.max(...a)||1,pts=a.map((n,i)=>(i*100/Math.max(a.length-1,1))+','+(28-(n-lo)/((hi-lo)||1)*26)).join(' ');
+const pl=document.createElementNS('http://www.w3.org/2000/svg','polyline');pl.setAttribute('points',pts);pl.setAttribute('fill','none');pl.setAttribute('stroke','currentColor');svg.replaceChildren(pl);v.textContent=a.length+' samples';return}
+v.textContent=t.type=='percentage'?x+' %':fmt(x,t.unit);if(bar)bar.value=x};return card}
+function ctl(c){const card=h('div',{className:'card'},h('div',{className:'lbl'},c.label||c.id));const note=h('div',{className:'warn'});
+const go=v=>send(c,v,card,note);let u;
+if(c.type=='toggle'){const b=h('button',{},'');b.onclick=()=>go(c.options.find(o=>o!=S.vals[c.id])??c.options[0]);card.append(b);u=x=>b.textContent=x==null?'unavailable':x}
+else if(c.type=='dropdown_select'){const s=h('select');for(const o of c.options||[])s.append(h('option',{value:o},o));s.onchange=()=>go(s.value);card.append(s);u=x=>{if(x!=null)s.value=x}}
+else if(c.type=='slider'){const r=h('input',{type:'range',min:c.min,max:c.max,step:'any'}),o=h('span',{className:'lbl'});r.oninput=()=>o.textContent=fmt(+r.value,c.unit);r.onchange=()=>go(+r.value);card.append(r,o);u=x=>{if(x!=null){r.value=x;o.textContent=fmt(x,c.unit)}}}
+else if(c.type=='text_input'){const i=h('input',{maxLength:c.max_length||64}),b=h('button',{},'Send');b.onclick=()=>go(i.value);card.append(h('div',{className:'row'},i,b));u=x=>{if(x!=null&&document.activeElement!=i)i.value=x}}
+else if(c.type=='button'){const b=h('button',{},c.label||c.id);b.onclick=()=>go(true);card.replaceChildren(b);u=()=>{}}
+else{card.append(h('div',{className:'lbl'},'Unsupported control type: '+c.type));u=()=>{}}
+card.append(note);S.up[c.id]=u;return card}
+function apply(){for(const id in S.up)S.up[id](S.vals[id]);S.seen=S.seen||Date.now();
+document.querySelectorAll('.pend').forEach(e=>e.classList.remove('pend'));$('#app').className=S.stale?'stale':''}
+function merge(o){Object.assign(S.vals,o);S.seen=Date.now();S.stale=false;apply()}
+async function send(c,v,card,note){note.textContent='';card.classList.add('pend');
+if(S.demo){merge({[c.id]:c.type=='button'?S.vals[c.id]:v});if(c.type=='button')note.textContent='Sent.';return}
+try{await S.ctl.writeValueWithResponse(enc({[c.id]:v}));await readVals()}
+catch(e){card.classList.remove('pend');const phys=c.confirm=='physical'&&(!c.confirm_on||c.confirm_on.includes(v));
+note.textContent=phys?'The device may need physical confirmation. Press its button, then try again.':'The device rejected the change or is busy.';}}
+/* BLE */
+function getManifest(ch){return new Promise((res,rej)=>{let parts=[],exp=0,got=0,seq=0,en=1;const t=setTimeout(()=>{ch.removeEventListener('characteristicvaluechanged',f);rej(new Error('Manifest transfer timed out'))},10000);
+function f(ev){const d=bytes(ev.target.value);let o=2;
+if(d[0]&1){seq=0;parts=[];got=0;en=d[2];exp=new DataView(d.buffer,3,4).getUint32(0);o=7}
+if(d[1]!=seq){clearTimeout(t);ch.removeEventListener('characteristicvaluechanged',f);rej(new Error('Manifest frame out of sequence'));return}
+seq=(seq+1)&255;const c=d.subarray(o);parts.push(c);got+=c.length;
+if(d[0]&2){clearTimeout(t);ch.removeEventListener('characteristicvaluechanged',f);
+if(got!=exp){rej(new Error('Manifest length mismatch'));return}
+const all=new Uint8Array(got);let p=0;for(const c of parts){all.set(c,p);p+=c.length}res({en,all})}}
+ch.addEventListener('characteristicvaluechanged',f);ch.startNotifications().catch(e=>{clearTimeout(t);rej(e)})})}
+let cv=null;async function readVals(){merge(dec(bytes(await cv.readValue())))}
+async function connect(){
+if(!navigator.bluetooth){status('Web Bluetooth is not available here. Use Chrome or Edge on Android or Windows, served from localhost or HTTPS.',1);return}
+for(const k in UU)UU[k]=$('#u_'+k).value.trim().toLowerCase();
+try{status('Press the pairing button on the device, then choose it in the list.');
+const dev=await navigator.bluetooth.requestDevice($('#all').checked?{acceptAllDevices:true,optionalServices:[UU.svc]}:{filters:[{services:[UU.svc]}]});
+dev.addEventListener('gattserverdisconnected',()=>{clearInterval(S.poll);S.stale=true;apply();status('Disconnected. Showing the last known values. Tap Connect to reconnect.',1)});
+status('Connecting. If your phone or PC asks to pair, accept.');
+const srv=await dev.gatt.connect(),svc=await srv.getPrimaryService(UU.svc);
+const cm=await svc.getCharacteristic(UU.man);cv=await svc.getCharacteristic(UU.val);S.ctl=await svc.getCharacteristic(UU.ctl).catch(()=>null);
+S.demo=null;status('Reading the Manifest.');const r=await getManifest(cm);S.enc=r.en;S.man=dec(r.all);S.vals={};render();
+await readVals();
+if(cv.properties.notify){await cv.startNotifications();cv.addEventListener('characteristicvaluechanged',e=>merge(dec(bytes(e.target.value))))}
+else{clearInterval(S.poll);S.poll=setInterval(()=>readVals().catch(()=>{}),2000)}
+status('Connected.')}
+catch(e){status(e.name=='NotFoundError'?'No device chosen.':'Could not connect: '+e.message,1)}}
+/* Demo */
+const DEMO={plugs_version:'1.0',device:{name:'Demo e-bike (simulated)'},telemetry:[
+{id:'speed',label:'Speed',type:'digital_readout',unit:'km/h'},{id:'battery_level',label:'Battery',type:'percentage',role:'battery_level'},
+{id:'distance',label:'Trip distance',type:'digital_readout',unit:'km'},{id:'motor_temp',label:'Motor temperature',type:'percentage_gauge',unit:'degC',min:0,max:100},
+{id:'fault',label:'Fault',type:'status_indicator',role:'fault'}],controls:[
+{id:'assist',label:'Assist level',type:'dropdown_select',options:['ECO','TOUR','SPORT']},{id:'light',label:'Headlight',type:'toggle',options:['ON','OFF']},
+{id:'brightness',label:'Display brightness',type:'slider',min:0,max:100,unit:'%'},{id:'trip_reset',label:'Reset trip',type:'button'}],security:{pairing_method:'POWER_UP_WINDOW',air_gapped:true}};
+function demo(){clearInterval(S.poll);S.demo=1;S.man=DEMO;S.vals={speed:18.4,battery_level:76,distance:12.3,motor_temp:41,fault:'NONE',assist:'TOUR',light:'OFF',brightness:60};
+render();status('Demo mode: no device is connected.');S.poll=setInterval(()=>{const v=S.vals;merge({speed:Math.max(0,v.speed+(Math.random()-.5)*2),distance:v.distance+v.speed/3600,battery_level:Math.max(0,v.battery_level-.01),motor_temp:Math.min(100,v.motor_temp+(Math.random()-.45))})},1000)}
+$('#bc').onclick=connect;$('#bd').onclick=demo;
+$('#bu').onclick=()=>{S.metric=!S.metric;$('#bu').textContent='Units: '+(S.metric?'metric':'imperial');if(S.man)apply()};
+setInterval(()=>{if(S.seen){const s=Math.round((Date.now()-S.seen)/1000);$('#age').textContent=(S.stale?'Last seen ':'Updated ')+(s<60?s+' s':Math.round(s/60)+' min')+' ago'}},1000);
+</script></body></html>
